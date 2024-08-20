@@ -182,6 +182,9 @@ const HeroSection = () => {
         </div>
       )}
       <TranscriptionPreview transcription={transcription} />
+      <footer className="text-gray-400 text-sm mt-12">
+        Made with ❤️ by <a href="https://github.com/Sajal0208" target="_blank" rel="noopener noreferrer" className=" bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">Sajal Dewangan</a>
+      </footer>
     </div>
   );
 };
