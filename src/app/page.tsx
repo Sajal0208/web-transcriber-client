@@ -20,6 +20,7 @@ const HeroSection = () => {
   }[]>([]);
   const [isTranscribing, setIsTranscribing] = useState<boolean>(false);
   const [showTimestamps, setShowTimestamps] = useState<boolean>(false);
+  const [transcriptionId, setTranscriptionId] = useState<string | null>(null);
 
   const handleFileChange = (newFiles: File[]) => {
     setFile(null);
@@ -60,6 +61,16 @@ const HeroSection = () => {
 
         const lines = chunk.split('\n');
 
+        try {
+          const data = JSON.parse(chunk);
+          if (data && typeof data === 'object' && 'id' in data) {
+            setTranscriptionId(data.id);
+          }
+        } catch (error) {
+          // If parsing fails, it's not JSON
+          console.log('Chunk is not JSON:', chunk);
+        }
+
         const newTranscriptions = lines.map(line => {
           const [timestamp, text] = line.split(']   ');
           const formattedTimestamp = timestamp.replace('[', '').trim();
@@ -76,6 +87,20 @@ const HeroSection = () => {
       setIsTranscribing(false);
     }
   };
+  console.log(transcriptionId);
+
+  const handleDownload = (format: string) => {
+    try {
+      fetch(`http://localhost:4000/api/download/${transcriptionId}/${format}`, {
+        headers: {
+          responseType: "blob",
+        },
+        method: "GET",
+      })
+    } catch (error) {
+      console.error('Error downloading file:', error);
+    }
+  }
 
   return (
     <div className="flex flex-col mt-20 text-gray-300 items-center justify-center w-full max-w-4xl mx-auto px-4">
@@ -106,22 +131,46 @@ const HeroSection = () => {
             className="flex flex-col items-center gap-4 mt-8"
           >
             {transcription.length === 0 ? <TranscriptionButton file={file} onClick={handleTranscription} isTranscribing={isTranscribing} /> : null}
-            {(transcription.length > 0 || file) ? <motion.button
+            {((transcription.length > 0 || file) && !isTranscribing) ? <button
               onClick={() => {
                 setFile(null);
                 setTranscription([]);
               }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{ duration: 0.2 }}
-              className="px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
+              className="px-6 py-2 bg-red-500 text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400"
             >
               Clear
-            </motion.button> : null}
+            </button> : null}
           </motion.div>
         )}
       </AnimatePresence>
+      {(transcription.length > 0 && !isTranscribing) && (
+        <div className="flex flex-row flex-wrap gap-4 mt-8">
+          <a href={`http://localhost:4000/api/download/${transcriptionId}/srt`} target="_blank" rel="noopener noreferrer">
+            <button onClick={() => handleDownload('srt')} className="p-[3px] relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+              <div className="px-8 py-2  bg-black rounded-[6px]  relative group transition duration-200 text-white hover:bg-transparent">
+                .SRT
+              </div>
+            </button>
+          </a>
+          <a href={`http://localhost:4000/api/download/${transcriptionId}/vtt`} target="_blank" rel="noopener noreferrer">
+            <button onClick={() => handleDownload('vtt')} className="p-[3px] relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+              <div className="px-8 py-2  bg-black rounded-[6px]  relative group transition duration-200 text-white hover:bg-transparent">
+                .VTT
+              </div>
+            </button>
+          </a>
+          <a href={`http://localhost:4000/api/download/${transcriptionId}/txt`} target="_blank" rel="noopener noreferrer">
+            <button onClick={() => handleDownload('txt')} className="p-[3px] relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+              <div className="px-8 py-2  bg-black rounded-[6px]  relative group transition duration-200 text-white hover:bg-transparent">
+                .TXT
+              </div>
+            </button>
+          </a>
+        </div>
+      )}
       <TranscriptionPreview transcription={transcription} />
     </div>
   );
@@ -157,3 +206,4 @@ const TranscriptionLine = ({ text, timestamp }: { text: string; timestamp: strin
     </motion.div>
   );
 };
+
