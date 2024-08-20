@@ -3,6 +3,7 @@ import { FileUpload } from "@/components/file-upload";
 import TranscriptionButton from "@/components/transcription-button";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { TypewriterEffectSmooth } from "@/components/typewriter-effect";
 
 export default function Home() {
   return (
@@ -11,6 +12,16 @@ export default function Home() {
     </main>
   );
 }
+
+const words = [
+  { text: "Transform" },
+  { text: "your" },
+  { text: "audio" },
+  { text: "into" },
+  { text: "text" },
+  { text: "with" },
+  { text: "ease" }
+]
 
 const HeroSection = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -87,7 +98,6 @@ const HeroSection = () => {
       setIsTranscribing(false);
     }
   };
-  console.log(transcriptionId);
 
   const handleDownload = (format: string) => {
     try {
@@ -111,7 +121,7 @@ const HeroSection = () => {
         className="text-center mb-12"
       >
         <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">Web Transcriber</h1>
-        <p className="text-xl text-gray-400">Transform your audio into text with ease</p>
+        <TypewriterEffectSmooth words={words} />
       </motion.div>
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
