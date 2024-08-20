@@ -19,8 +19,11 @@ const HeroSection = () => {
     timestamp: string;
   }[]>([]);
   const [isTranscribing, setIsTranscribing] = useState<boolean>(false);
+  const [showTimestamps, setShowTimestamps] = useState<boolean>(false);
 
   const handleFileChange = (newFiles: File[]) => {
+    setFile(null);
+    setTranscription([]);
     setFile(newFiles[0]);
   };
 
@@ -102,9 +105,12 @@ const HeroSection = () => {
             transition={{ duration: 0.3 }}
             className="flex flex-col items-center gap-4 mt-8"
           >
-            <TranscriptionButton file={file} onClick={handleTranscription} isTranscribing={isTranscribing} />
-            <motion.button
-              onClick={() => setFile(null)}
+            {transcription.length === 0 ? <TranscriptionButton file={file} onClick={handleTranscription} isTranscribing={isTranscribing} /> : null}
+            {(transcription.length > 0 || file) ? <motion.button
+              onClick={() => {
+                setFile(null);
+                setTranscription([]);
+              }}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
@@ -112,7 +118,7 @@ const HeroSection = () => {
               className="px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors"
             >
               Clear
-            </motion.button>
+            </motion.button> : null}
           </motion.div>
         )}
       </AnimatePresence>
@@ -127,11 +133,8 @@ const TranscriptionPreview = ({ transcription }: { transcription: { text: string
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="w-full mt-12 bg-gray-800 rounded-lg p-6 shadow-lg"
+      className="w-full mt-12 rounded-lg p-6"
     >
-      <h2 className="text-2xl font-semibold mb-4 flex items-center">
-        Transcription
-      </h2>
       <div className="space-y-4">
         {transcription.map(({ text, timestamp }, index) => (
           <TranscriptionLine key={`${timestamp}-${index}`} text={text} timestamp={timestamp} />
