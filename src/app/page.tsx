@@ -4,6 +4,7 @@ import TranscriptionButton from "@/components/transcription-button";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TypewriterEffectSmooth } from "@/components/typewriter-effect";
+import { toast } from "sonner";
 
 export default function Home() {
   return (
@@ -33,14 +34,25 @@ const HeroSection = () => {
   const [showTimestamps, setShowTimestamps] = useState<boolean>(false);
   const [transcriptionId, setTranscriptionId] = useState<string | null>(null);
 
+  const validateFileSize = (file: File) => {
+    if (file.size > 100000000) {
+      toast.error("Please upload a file smaller than 100MB");
+      return false;
+    }
+    return true;
+  }
+
   const handleFileChange = (newFiles: File[]) => {
+    validateFileSize(newFiles[0]);
     setFile(null);
     setTranscription([]);
     setFile(newFiles[0]);
+    toast.success("File uploaded successfully");
   };
 
   const handleTranscription = async () => {
     if (!file) {
+      toast.error("Please upload a file");
       return;
     }
 
@@ -107,8 +119,9 @@ const HeroSection = () => {
         },
         method: "GET",
       })
+      toast.success("File downloaded successfully");
     } catch (error) {
-      console.error('Error downloading file:', error);
+      toast.error("Error downloading file");
     }
   }
 
@@ -129,7 +142,7 @@ const HeroSection = () => {
         transition={{ duration: 0.5, delay: 0.2 }}
         className="w-full max-w-md"
       >
-        <FileUpload file={file} setFile={setFile} accept="audio/*" onChange={handleFileChange} />
+        <FileUpload file={file} setFile={setFile} accept="audio/*, video/*" onChange={handleFileChange} />
       </motion.div>
       <AnimatePresence>
         {file && (
@@ -145,6 +158,7 @@ const HeroSection = () => {
               onClick={() => {
                 setFile(null);
                 setTranscription([]);
+                toast.success("File cleared successfully");
               }}
               className="px-6 py-2 bg-red-500 text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400"
             >
@@ -182,7 +196,7 @@ const HeroSection = () => {
         </div>
       )}
       <TranscriptionPreview transcription={transcription} />
-      <footer className="text-gray-400 text-sm mt-12">
+      <footer className="text-gray-400 text-sm my-12">
         Made with ❤️ by <a href="https://github.com/Sajal0208" target="_blank" rel="noopener noreferrer" className=" bg-gradient-to-r from-blue-400 to-purple-500 text-transparent bg-clip-text">Sajal Dewangan</a>
       </footer>
     </div>
